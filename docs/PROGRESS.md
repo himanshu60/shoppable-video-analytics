@@ -258,3 +258,74 @@ change the same lines *after* they diverge, and these never diverged.
 **Verify:** `git log --oneline --graph --all --decorate`
 
 ---
+
+## Step 8 - Frontend architecture
+
+**What:** React 18 + Vite dashboard, styled with SCSS Modules.
+
+**Why SCSS Modules and not Tailwind:** the brief explicitly rules out
+utility-class frameworks. SCSS Modules give locally-scoped class names (no
+global collisions), real semantic HTML, and nesting/mixins where they help.
+
+**Layer split:**
+
+| File | Responsibility |
+|------|----------------|
+| `api/client.js` | One fetch wrapper; the only place that knows about HTTP |
+| `hooks/useAnalytics.js` | All data fetching + loading/error state |
+| `utils/format.js` | Conversion rate and number/currency formatting |
+| `components/*` | Presentation only |
+| `App.jsx` | Layout and URL-ish state (page, limit, sort) |
+
+**Why a Vite proxy instead of a hard-coded API URL:** `vite.config.js` proxies
+`/api` to `localhost:4000`. Client code uses origin-relative paths, so there
+is no CORS preflight in development and nothing to change when the app is
+deployed behind a single origin.
+
+**Three details worth calling out:**
+
+1. **Request-id guard in `useAnalytics`.** If a slow request resolves after a
+   newer one, it is discarded. Without this, clicking through pages quickly
+   can leave stale rows on screen.
+
+2. **Two loading states.** First load shows a skeleton; a background refresh
+   after simulating traffic dims the existing table instead. Flashing an empty
+   table on every refresh reads as a bug.
+
+3. **Zero views renders an em dash, not 0.0%.** "Nobody converted" and
+   "nobody watched" are different facts. The seed data includes a zero-event
+   video so this path is always visible.
+
+**Verify:** `npm run build` (compiles with no warnings)
+
+---
+
+## Step 9 - End-to-end verification
+
+**What:** Ran both servers and tested the real request path.
+
+| Check | Result |
+|-------|--------|
+| `GET :4000/health` | 200 |
+| `GET :5173/` (Vite) | 200 |
+| `GET :5173/api/analytics/summary` (through proxy) | 200, real data |
+| `POST :5173/api/events` then re-read summary | conversions 86 -> 87 |
+
+**Why test through port 5173 rather than 4000:** that is the path the browser
+actually takes. Testing the backend directly would not prove the proxy works.
+
+**Verify:** `npm run dev`, then open http://localhost:5173
+
+---
+
+## Step 10 - Documentation
+
+**What:** Wrote `README.md` (setup, API reference, schema diagram, query
+walkthrough, trade-offs) and `AI_PROMPTING.md` (the assignment-required log of
+AI interactions, including both debugging sessions).
+
+The README opens with a TODO checklist for the three things only you can
+supply: the YouTube pitch link, the Loom walkthrough link, and links to your
+other public repositories.
+
+---
