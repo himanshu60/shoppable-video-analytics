@@ -1,0 +1,127 @@
+@use 'mixins' as *;
+
+/*
+ * Design tokens live as CSS custom properties rather than SCSS variables so
+ * that a single media query can retheme the whole app for dark mode. SCSS
+ * variables are compile-time and cannot respond to the user's OS setting.
+ */
+:root {
+  /* Neutrals */
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f0f2f5;
+  --color-border: #e2e5ea;
+  --color-border-strong: #cbd1da;
+  --color-text: #16191d;
+  --color-text-muted: #5c6470;
+
+  /* Accent + semantic */
+  --color-accent: #4f46e5;
+  --color-accent-hover: #4338ca;
+  --color-accent-soft: #eef2ff;
+  --color-on-accent: #ffffff;
+  --color-positive: #0f7b52;
+  --color-positive-soft: #e6f4ee;
+  --color-warning: #9a5b00;
+  --color-warning-soft: #fdf3e3;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
+
+  /* Metric hues, one per funnel stage */
+  --color-views: #2563eb;
+  --color-clicks: #7c3aed;
+  --color-conversions: #0f7b52;
+
+  /* Spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --shadow-sm: 0 1px 2px rgb(16 25 40 / 6%);
+  --shadow-md: 0 4px 16px rgb(16 25 40 / 8%);
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* Tabular figures keep metric columns aligned as numbers change. */
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0f1216;
+    --color-surface: #171b21;
+    --color-surface-sunken: #1e232b;
+    --color-border: #2a313b;
+    --color-border-strong: #3a424e;
+    --color-text: #e9ecf1;
+    --color-text-muted: #9aa4b2;
+
+    --color-accent: #818cf8;
+    --color-accent-hover: #a5b4fc;
+    --color-accent-soft: #1e2340;
+    --color-on-accent: #0f1216;
+    --color-positive: #4ade80;
+    --color-positive-soft: #10261c;
+    --color-warning: #fbbf24;
+    --color-warning-soft: #2a2110;
+    --color-danger: #f87171;
+    --color-danger-soft: #2c1616;
+
+    --color-views: #60a5fa;
+    --color-clicks: #a78bfa;
+    --color-conversions: #4ade80;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%);
+    --shadow-md: 0 4px 16px rgb(0 0 0 / 45%);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Respects a user who has enlarged their browser's default font size. */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+:where(button, a, input, select):focus-visible {
+  @include focus-ring;
+}
+
+/* Users who ask for reduced motion get no transitions at all. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

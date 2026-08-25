@@ -1,0 +1,89 @@
+@use './styles/mixins' as *;
+
+.app {
+  max-width: 76rem;
+  padding: var(--space-6) var(--space-5) var(--space-7);
+  margin: 0 auto;
+
+  @include below($bp-narrow) {
+    padding: var(--space-5) var(--space-4) var(--space-6);
+  }
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.title {
+  margin-top: var(--space-1);
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+
+  @include below($bp-narrow) {
+    font-size: 1.5rem;
+  }
+}
+
+.subtitle {
+  max-width: 44ch;
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+// auto-fit lets four cards sit in a row on desktop and reflow to two, then
+// one, without any breakpoint doing the work.
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.error {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border: 1px solid currentcolor;
+  border-radius: var(--radius-sm);
+}
+
+.retry {
+  padding: var(--space-1) var(--space-3);
+  margin-left: auto;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid currentcolor;
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    background: rgb(0 0 0 / 6%);
+  }
+}
+
+.footer {
+  margin-top: var(--space-6);
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,29 @@
+// Breakpoints, named for the layout change they trigger rather than for a
+// device, so the names stay true as screen sizes drift.
+$bp-compact: 900px; // table starts to feel cramped
+$bp-narrow: 600px; // phone portrait
+
+@mixin below($breakpoint) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+}
+
+// Visually hidden but still announced by screen readers. Used for table
+// captions and live-region status text.
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@mixin focus-ring {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

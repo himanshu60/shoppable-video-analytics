@@ -1,0 +1,86 @@
+@use '../../styles/mixins' as *;
+
+.card {
+  position: relative;
+  padding: var(--space-4) var(--space-5);
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+
+  // Coloured rail on the leading edge; carries the tone without relying on
+  // colour alone, since the label text says which metric it is.
+  &::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    content: '';
+    background: var(--tone, var(--color-border-strong));
+  }
+}
+
+.views {
+  --tone: var(--color-views);
+}
+
+.clicks {
+  --tone: var(--color-clicks);
+}
+
+.conversions {
+  --tone: var(--color-conversions);
+}
+
+.accent {
+  --tone: var(--color-accent);
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.value {
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1.2;
+
+  @include below($bp-narrow) {
+    font-size: 1.5rem;
+  }
+}
+
+.hint {
+  margin-top: var(--space-1);
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+// Shown instead of a number during the first load, so the card does not
+// collapse and shift the layout when data arrives.
+.placeholder {
+  display: inline-block;
+  width: 3.5rem;
+  height: 1.5rem;
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-sm);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
