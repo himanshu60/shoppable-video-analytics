@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { conversionRate, formatCurrency, formatNumber, formatPercent, rateTone } from '../../utils/format.js';
 import styles from './VideoTable.module.scss';
 
@@ -24,8 +25,13 @@ function SortIndicator({ active, order }) {
  *
  * Rendered as a real <table> with <caption>, <th scope> and aria-sort so it
  * is navigable by screen reader — a div grid would lose all of that.
+ *
+ * Scrolling happens inside the card (see the .scroll rules), not on the page,
+ * which is what lets the header stay pinned while rows move under it.
  */
 export function VideoTable({ rows, sortBy, order, onSort, isLoading, isRefreshing }) {
+  const [hasScrolled, setHasScrolled] = useState(false);
+
   if (isLoading) {
     return (
       <div className={styles.wrapper}>
@@ -51,10 +57,20 @@ export function VideoTable({ rows, sortBy, order, onSort, isLoading, isRefreshin
 
   return (
     <div className={styles.wrapper}>
-      {/* The table scrolls inside this container rather than pushing the page
-          sideways on narrow screens. */}
-      <div className={styles.scroll} tabIndex="0" role="region" aria-label="Video metrics table">
-        <table className={`${styles.table} ${isRefreshing ? styles.dimmed : ''}`}>
+      {/* tabIndex makes the scroll area reachable by keyboard, which a plain
+          overflow container is not. */}
+      <div
+        className={styles.scroll}
+        tabIndex="0"
+        role="region"
+        aria-label="Video metrics table"
+        onScroll={(event) => setHasScrolled(event.currentTarget.scrollTop > 0)}
+      >
+        <table
+          className={[styles.table, isRefreshing && styles.dimmed, hasScrolled && styles.scrolled]
+            .filter(Boolean)
+            .join(' ')}
+        >
           <caption className={styles.caption}>
             Engagement metrics per shoppable video. Conversion rate is add-to-carts divided by
             views.

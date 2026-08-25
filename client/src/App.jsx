@@ -1,9 +1,11 @@
 import { useCallback, useState } from 'react';
 import { useAnalytics } from './hooks/useAnalytics.js';
+import { useTheme } from './hooks/useTheme.js';
 import { StatCard } from './components/StatCard/StatCard.jsx';
 import { VideoTable } from './components/VideoTable/VideoTable.jsx';
 import { Pagination } from './components/Pagination/Pagination.jsx';
 import { SimulateTrafficButton } from './components/SimulateTrafficButton/SimulateTrafficButton.jsx';
+import { ThemeToggle } from './components/ThemeToggle/ThemeToggle.jsx';
 import { conversionRate, formatNumber, formatPercent } from './utils/format.js';
 import styles from './App.module.scss';
 
@@ -12,6 +14,7 @@ export default function App() {
   const [limit, setLimit] = useState(10);
   const [sortBy, setSortBy] = useState('views');
   const [order, setOrder] = useState('desc');
+  const { theme, resolvedTheme, setTheme } = useTheme();
 
   const { rows, pagination, summary, isInitialLoading, isRefreshing, error, refresh } = useAnalytics(
     { page, limit, sortBy, order }
@@ -51,7 +54,10 @@ export default function App() {
           </p>
         </div>
 
-        <SimulateTrafficButton onSimulated={refresh} />
+        <div className={styles.headerActions}>
+          <ThemeToggle theme={theme} resolvedTheme={resolvedTheme} onChange={setTheme} />
+          <SimulateTrafficButton onSimulated={refresh} />
+        </div>
       </header>
 
       {error && (

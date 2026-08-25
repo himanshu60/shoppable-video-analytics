@@ -8,6 +8,18 @@
       content="Track views, clicks and add-to-cart conversions for shoppable product videos."
     />
     <title>Shoppable Video Analytics</title>
+    <script>
+      // Applies the saved theme before first paint. Without this, a user who
+      // chose dark sees a white flash while the React bundle loads.
+      try {
+        var saved = localStorage.getItem('svd-theme');
+        if (saved === 'dark' || saved === 'light') {
+          document.documentElement.setAttribute('data-theme', saved);
+        }
+      } catch (e) {
+        /* localStorage unavailable; fall back to the OS preference. */
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

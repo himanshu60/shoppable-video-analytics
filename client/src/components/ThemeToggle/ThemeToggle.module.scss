@@ -1,0 +1,44 @@
+@use '../../styles/mixins' as *;
+
+.group {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.option {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--radius-sm) - 2px);
+  transition: background 120ms ease, color 120ms ease;
+
+  &:hover:not(.selected) {
+    color: var(--color-text);
+    background: var(--overlay-hover);
+  }
+}
+
+.selected {
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+// The icon alone is enough on phones; the words are the first thing to go.
+.label {
+  @include below($bp-narrow) {
+    @include visually-hidden;
+  }
+}
