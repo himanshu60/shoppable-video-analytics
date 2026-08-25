@@ -357,3 +357,59 @@ real build:
   risk, so the test budget went there.
 - **Polling, not streaming.** The table refreshes on demand; live updates
   would use SSE or WebSockets.
+
+---
+
+## Deployment
+
+The whole project deploys as **one service**: in production the Express
+process serves the built React app as well as the API, so there is a single
+URL and no CORS configuration.
+
+**Serverless hosts do not work for this.** Vercel and Netlify functions have an
+ephemeral filesystem, so the SQLite file is discarded between invocations and
+the dashboard would lose data unpredictably. A long-running Node service is
+required.
+
+### Render (free tier)
+
+The repository includes `render.yaml`, so Render can configure itself:
+
+1. Push the branch to GitHub.
+2. On https://render.com choose **New → Blueprint** and select the repository.
+3. Render reads `render.yaml` and creates the service. Click **Apply**.
+
+Or configure a Web Service manually:
+
+| Setting | Value |
+|---------|-------|
+| Runtime | Node |
+| Build command | `npm install && npm run build` |
+| Start command | `npm start` |
+| Health check path | `/health` |
+| Env var | `NODE_ENV=production` |
+
+### How production differs from development
+
+| | Development | Production |
+|---|---|---|
+| Frontend | Vite dev server on :5173 with HMR | Static build served by Express |
+| Origins | Two (proxy handles `/api`) | One |
+| Database | `npm run db:reset` by hand | Migrated on boot, seeded if empty |
+
+`NODE_ENV=production` switches on static file serving and seed-on-boot.
+
+### The ephemeral filesystem caveat
+
+Render's free tier resets the disk on every restart and redeploy, so the
+SQLite file does not survive. The server handles this by seeding on boot
+**only when the database is empty** — a redeployed demo is always populated,
+and existing data is never overwritten.
+
+Events created by the Simulate Traffic button therefore persist for the life
+of the instance, not beyond it. For durable storage, attach a Render disk
+mounted at `server/data` and set `SEED_ON_BOOT=false`.
+
+Free instances also sleep after ~15 minutes idle, so the first request after a
+quiet period takes 30–60 seconds to wake. Worth mentioning to anyone you share
+the link with.
