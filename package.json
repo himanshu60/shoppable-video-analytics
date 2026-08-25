@@ -16,12 +16,17 @@
     "dev:client": "npm run dev --workspace=client",
     "dev": "concurrently -n server,client -c blue,magenta \"npm:dev:server\" \"npm:dev:client\"",
     "test": "npm run test --workspace=server",
-    "build": "npm run build --workspace=client"
+    "build": "npm run build --workspace=client",
+    "db:inspect": "npm run db:inspect --workspace=server --",
+    "start": "npm start --workspace=server"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "allowScripts": {
+    "esbuild": true
   }
 }

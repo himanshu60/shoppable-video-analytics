@@ -1,0 +1,83 @@
+@use '../../styles/mixins' as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-end;
+
+  @include below($bp-compact) {
+    align-items: stretch;
+  }
+}
+
+.buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+%button-base {
+  padding: var(--space-3) var(--space-5);
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 120ms ease, border-color 120ms ease, transform 80ms ease;
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.primary {
+  @extend %button-base;
+
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+
+  &:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+  }
+}
+
+.secondary {
+  @extend %button-base;
+
+  color: var(--color-accent);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+
+  &:hover:not(:disabled) {
+    background: var(--color-accent-soft);
+    border-color: var(--color-accent);
+  }
+}
+
+.status {
+  // Fixed min-height reserves the line so the layout does not jump when the
+  // hint text is replaced by a result message.
+  min-height: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  text-align: right;
+
+  @include below($bp-compact) {
+    text-align: left;
+  }
+}
+
+.success {
+  color: var(--color-positive);
+}
+
+.error {
+  color: var(--color-danger);
+}

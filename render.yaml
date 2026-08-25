@@ -1,0 +1,27 @@
+# Render blueprint - https://render.com/docs/blueprint-spec
+#
+# One web service runs the Express API and serves the built React app, so the
+# whole project deploys to a single URL with no CORS configuration.
+#
+# Deploy either by pointing Render at this file (New > Blueprint), or by
+# creating a Web Service manually with the build and start commands below.
+
+services:
+  - type: web
+    name: shoppable-video-analytics
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render's free tier has an ephemeral filesystem: the SQLite file is
+      # lost on every restart and redeploy. The server re-seeds automatically
+      # when it boots to an empty database, so the demo is always populated.
+      # Set this to false if you attach a persistent disk and want the data
+      # to survive restarts.
+      - key: SEED_ON_BOOT
+        value: 'true'

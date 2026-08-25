@@ -1,0 +1,109 @@
+@use 'mixins' as *;
+@use 'tokens' as *;
+
+/*
+ * Theming has three states:
+ *   1. no choice made  -> follow the OS via prefers-color-scheme
+ *   2. data-theme="light" -> force light, even if the OS is dark
+ *   3. data-theme="dark"  -> force dark, even if the OS is light
+ *
+ * Light is defined on bare :root so it is always the baseline. The dark block
+ * is guarded with :not([data-theme="light"]) so an explicit light choice wins
+ * over the OS preference.
+ */
+:root {
+  @include scale-tokens;
+  @include light-tokens;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include dark-tokens;
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  @include dark-tokens;
+
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  @include light-tokens;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Respects a user who has enlarged their browser's default font size. */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+:where(button, a, input, select):focus-visible {
+  @include focus-ring;
+}
+
+/* Scrollbars themed to match, so the table's scroll area does not render as a
+   bright grey strip inside a dark card. Firefox uses the standard properties;
+   WebKit needs its own pseudo-elements. */
+* {
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb);
+  border: 2px solid var(--color-scrollbar-track);
+  border-radius: 6px;
+
+  &:hover {
+    background: var(--color-border-strong);
+  }
+}
+
+/* Users who ask for reduced motion get no transitions at all. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

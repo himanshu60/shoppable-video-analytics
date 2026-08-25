@@ -1,0 +1,93 @@
+@use '../../styles/mixins' as *;
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+}
+
+.summary {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+
+  strong {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
+  }
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.perPage {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+
+  select {
+    padding: var(--space-1) var(--space-2);
+    font: inherit;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+  }
+}
+
+.pager {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.button {
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  cursor: pointer;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  transition: background 120ms ease, border-color 120ms ease;
+
+  &:hover:not(:disabled) {
+    background: var(--color-surface-sunken);
+    border-color: var(--color-accent);
+  }
+
+  &:disabled {
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.position {
+  min-width: 7rem;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+@include below($bp-narrow) {
+  .bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls {
+    justify-content: space-between;
+  }
+}
