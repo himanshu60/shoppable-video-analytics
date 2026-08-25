@@ -280,10 +280,17 @@ force SQLite to materialise every group before `LIMIT` takes effect.
 - **Accessibility** — real `<table>` semantics with `scope`, `aria-sort`, a
   visually-hidden `<caption>`, `role="status"` for simulation feedback, and
   visible focus rings. `prefers-reduced-motion` disables all transitions.
-- **Responsive** — the table scrolls inside its own container, so the page
-  body never scrolls sideways. Stat cards reflow via `auto-fit` grid.
-- **Dark mode** — design tokens are CSS custom properties, so one
-  `prefers-color-scheme` query rethemes the entire app.
+- **Scrolling is contained inside the table card**, on both axes. The card
+  caps its height so rows scroll in place rather than pushing the pagination
+  controls off-screen, and the column headers are `position: sticky` so they
+  stay visible. The page body never scrolls sideways.
+- **Light / dark theme** with a three-state switch — Auto (follows your OS),
+  Light, Dark — persisted in `localStorage`. An inline script in `index.html`
+  applies the saved choice before first paint, so dark-mode users never see a
+  white flash. Design tokens are CSS custom properties defined once as a SCSS
+  mixin and emitted for both `prefers-color-scheme` and `[data-theme]`.
+- **Responsive** — stat cards reflow via an `auto-fit` grid; the theme
+  switch drops to icons only on phones.
 
 ---
 
