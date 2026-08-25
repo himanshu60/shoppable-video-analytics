@@ -329,3 +329,82 @@ supply: the YouTube pitch link, the Loom walkthrough link, and links to your
 other public repositories.
 
 ---
+
+## Step 11 - UI corrections: scroll containment and theming
+
+**Feedback:** the scroll area was outside the table, and the theme needed an
+explicit light/dark control.
+
+### Scroll containment
+
+**Before:** the container had `overflow-x: auto` only. Long result sets pushed
+the pagination controls off the bottom of the page, and the column headers
+scrolled out of sight.
+
+**After:** the scroll container sits inside the card and owns **both** axes:
+
+```scss
+.scroll {
+  max-height: min(65vh, 34rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+```
+
+- `max-height` caps the table so rows scroll in place and the pagination bar
+  stays put.
+- `overflow: hidden` on the parent card clips the scrollbar to the rounded
+  corners, so it renders inside the card instead of running past its edge.
+- `overscroll-behavior: contain` stops a scroll that reaches the bottom of the
+  table from continuing on to scroll the whole page.
+
+**Sticky header.** Column labels stay pinned via `position: sticky; top: 0` on
+the `<th>` cells. This only works because the container above is the scroll
+parent - sticky positions against the nearest scrolling ancestor.
+
+**One non-obvious fix:** the table had to move from `border-collapse: collapse`
+to `separate`. Under `collapse`, cell borders are painted by the *table*, not
+by the cell, so a sticky header's bottom border scrolls away with the rows and
+leaves the header floating with no edge. With `separate`, the header keeps its
+own border. The border itself is drawn with `inset box-shadow` rather than
+`border-bottom`, because a sticky cell's real border can sub-pixel-shift during
+scroll and flicker.
+
+### Light / dark theme
+
+**Three states, not two:** Auto / Light / Dark. A two-way toggle cannot express
+"follow my OS", which is what most people actually want, so the control is a
+`radiogroup` rather than a switch.
+
+**How it works:**
+
+| State | Mechanism |
+|-------|-----------|
+| Auto | no `data-theme` attribute -> `prefers-color-scheme` applies |
+| Light | `data-theme="light"` on `<html>` |
+| Dark | `data-theme="dark"` on `<html>` |
+
+The dark palette has to exist in two CSS blocks - one inside the media query,
+one under `[data-theme="dark"]`. Rather than duplicating forty declarations,
+they are defined once as a SCSS mixin in `_tokens.scss` and included twice.
+The media-query block is guarded with `:not([data-theme="light"])` so an
+explicit light choice beats a dark OS setting.
+
+**Flash of wrong theme:** a small inline script in `index.html` reads
+`localStorage` and sets the attribute *before* first paint. Without it, a dark
+-mode user sees a white flash while the React bundle downloads. Every
+`localStorage` access is wrapped in try/catch, because private-browsing modes
+make it throw rather than return null.
+
+**Also themed:** scrollbars, via `scrollbar-color` and the WebKit
+pseudo-elements. Left alone, the table's new scroll area renders as a bright
+grey strip inside a dark card.
+
+### Authentication - confirmed not required
+
+Re-read the brief: no mention of users, accounts, login or signup anywhere.
+The only entities specified are Products, Videos and EngagementEvents. Adding
+auth would be unrequested scope and would complicate the reviewer's setup. It
+is listed in the README as a deliberate omission.
+
+---
