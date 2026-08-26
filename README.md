@@ -26,15 +26,11 @@ dashboard, in one npm-workspace monorepo.
 
 ### Other public repositories
 
-Required by the brief: links to public repositories showing open-source or
-personal project contributions.
+- GitHub profile: **https://github.com/himanshu60**
 
-- GitHub profile: https://github.com/himanshu60
-
-_TODO: list your strongest two or three repositories here with a one-line
-description of each. If this project is your main public work, replace this
-paragraph with a single sentence saying so — a short honest answer reads
-better than a padded list._
+My portfolio and the rest of my public repository links are listed on my
+résumé, which was submitted alongside this application. My GitHub profile
+above is the canonical, up-to-date index of my public work.
 
 ---
 
