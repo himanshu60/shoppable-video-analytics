@@ -96,8 +96,57 @@ Run from the repository root:
 | `npm run dev` | Runs API + dashboard together |
 | `npm run dev:server` | API only, on port 4000 |
 | `npm run dev:client` | Dashboard only, on port 5173 |
-| `npm test` | Runs the backend test suite (17 tests) |
+| `npm run db:inspect` | Prints every table plus the aggregated metrics |
+| `npm run db:add` | Adds a product and video to the catalogue |
+| `npm test` | Runs the backend test suite (29 tests) |
 | `npm run build` | Production build of the dashboard |
+
+### Adding data
+
+**Engagement events** — use the **Simulate traffic** button in the dashboard,
+or post one directly:
+
+```bash
+curl -X POST http://localhost:4000/api/events \
+  -H "Content-Type: application/json" \
+  -d '{"videoId": 1, "eventType": "add_to_cart"}'
+```
+
+**Products and videos** — via the CLI:
+
+```bash
+# a new product plus its first video
+npm run db:add -- --product "Solstice Wool Scarf" --price 39.00 --video "Scarf Styling Reel"
+
+# another video for an existing product
+npm run db:add -- --video "Scarf Winter Lookbook" --product-id 9
+```
+
+The new video appears in the dashboard immediately with zero metrics — which
+is the `LEFT JOIN` in the aggregation doing its job.
+
+Catalogue management is a CLI script rather than an API endpoint on purpose:
+the brief specifies two endpoints, and this keeps the HTTP surface limited to
+the analytics read model, with no unauthenticated write path to the catalogue.
+
+### Inspecting the database
+
+```bash
+npm run db:inspect                      # every table + aggregated metrics
+npm run db:inspect -- products          # one table in full
+npm run db:inspect -- "SELECT event_type, COUNT(*) AS n FROM engagement_events GROUP BY event_type"
+```
+
+The connection is opened read-only, so these cannot corrupt data while the API
+is running.
+
+You can also open `server/data/analytics.db` in any SQLite browser — the file
+*is* the database. In VS Code, the *SQLite Viewer* extension renders it as
+browsable tables.
+
+> Recent writes may sit in `analytics.db-wal` rather than the main file until
+> the server shuts down cleanly. That is WAL mode, enabled so dashboard reads
+> are never blocked by simulated writes.
 
 ### Configuration
 
