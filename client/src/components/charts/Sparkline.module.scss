@@ -1,0 +1,19 @@
+.spark {
+  display: block;
+}
+
+.line {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.area {
+  opacity: var(--viz-fill-opacity);
+}
+
+.end {
+  stroke: var(--color-surface);
+  stroke-width: 1.5;
+}

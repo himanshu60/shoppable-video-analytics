@@ -1,24 +1,44 @@
 import { useCallback, useState } from 'react';
+import { fetchRecentEvents, fetchTimeseries } from './api/client.js';
 import { useAnalytics } from './hooks/useAnalytics.js';
+import { useResource } from './hooks/useResource.js';
 import { useTheme } from './hooks/useTheme.js';
-import { StatCard } from './components/StatCard/StatCard.jsx';
-import { VideoTable } from './components/VideoTable/VideoTable.jsx';
-import { Pagination } from './components/Pagination/Pagination.jsx';
-import { SimulateTrafficButton } from './components/SimulateTrafficButton/SimulateTrafficButton.jsx';
+import { useHashRoute } from './hooks/useHashRoute.js';
+import { Sidebar } from './components/Sidebar/Sidebar.jsx';
 import { ThemeToggle } from './components/ThemeToggle/ThemeToggle.jsx';
-import { conversionRate, formatNumber, formatPercent } from './utils/format.js';
+import { SimulateTrafficButton } from './components/SimulateTrafficButton/SimulateTrafficButton.jsx';
+import { VideoDetail } from './components/VideoDetail/VideoDetail.jsx';
+import { OverviewView } from './views/OverviewView.jsx';
+import { VideosView } from './views/VideosView.jsx';
+import { ActivityView } from './views/ActivityView.jsx';
 import styles from './App.module.scss';
 
+const VIEW_TITLES = {
+  overview: 'Overview',
+  videos: 'Videos',
+  activity: 'Activity',
+};
+
 export default function App() {
+  const [route, navigate] = useHashRoute();
+  const { theme, resolvedTheme, setTheme } = useTheme();
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sortBy, setSortBy] = useState('views');
   const [order, setOrder] = useState('desc');
-  const { theme, resolvedTheme, setTheme } = useTheme();
+  const [selectedVideoId, setSelectedVideoId] = useState(null);
 
-  const { rows, pagination, summary, isInitialLoading, isRefreshing, error, refresh } = useAnalytics(
-    { page, limit, sortBy, order }
-  );
+  const { rows, meta, pagination, summary, isInitialLoading, isRefreshing, error, refresh } =
+    useAnalytics({ page, limit, sortBy, order });
+
+  // Stable fetchers: useResource takes these as effect dependencies, so a new
+  // identity each render would re-fetch in a loop.
+  const timeseriesFetcher = useCallback(() => fetchTimeseries(14), []);
+  const recentFetcher = useCallback(() => fetchRecentEvents(30), []);
+
+  const timeseries = useResource(timeseriesFetcher);
+  const recentEvents = useResource(recentFetcher);
 
   /** Clicking the active column flips direction; a new column starts descending. */
   const handleSort = useCallback(
@@ -29,7 +49,7 @@ export default function App() {
         setSortBy(column);
         setOrder(column === 'title' ? 'asc' : 'desc');
       }
-      // Row order changes, so the current offset is meaningless - go back to
+      // Row order changes, so the current offset is meaningless — go back to
       // the first page rather than showing an arbitrary slice.
       setPage(1);
     },
@@ -41,87 +61,79 @@ export default function App() {
     setPage(1);
   }, []);
 
-  const overallRate = summary ? conversionRate(summary.totalConversions, summary.totalViews) : null;
+  /** Every write path refreshes all three data sources together. */
+  const refreshAll = useCallback(async () => {
+    await Promise.all([refresh(), timeseries.reload(), recentEvents.reload()]);
+  }, [refresh, timeseries, recentEvents]);
 
   return (
-    <div className={styles.app}>
-      <header className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>Videoselz</p>
-          <h1 className={styles.title}>Shoppable Video Analytics</h1>
-          <p className={styles.subtitle}>
-            Engagement and conversion performance for every product video on your storefront.
-          </p>
-        </div>
+    <div className={styles.shell}>
+      <Sidebar route={route} onNavigate={navigate} />
 
-        <div className={styles.headerActions}>
-          <ThemeToggle theme={theme} resolvedTheme={resolvedTheme} onChange={setTheme} />
-          <SimulateTrafficButton onSimulated={refresh} />
-        </div>
-      </header>
+      <div className={styles.main}>
+        <header className={styles.topbar}>
+          <div>
+            <h1 className={styles.title}>{VIEW_TITLES[route]}</h1>
+            <p className={styles.subtitle}>
+              Engagement and conversion performance for every product video on your storefront.
+            </p>
+          </div>
 
-      {error && (
-        <div className={styles.error} role="alert">
-          <strong>Could not load analytics.</strong> {error.message}
-          <button type="button" className={styles.retry} onClick={refresh}>
-            Retry
-          </button>
-        </div>
-      )}
+          <div className={styles.actions}>
+            <ThemeToggle theme={theme} resolvedTheme={resolvedTheme} onChange={setTheme} />
+            <SimulateTrafficButton onSimulated={refreshAll} />
+          </div>
+        </header>
 
-      <section className={styles.stats} aria-label="Overall performance">
-        <StatCard
-          label="Total views"
-          value={formatNumber(summary?.totalViews)}
-          tone="views"
-          isLoading={isInitialLoading}
-        />
-        <StatCard
-          label="Total clicks"
-          value={formatNumber(summary?.totalClicks)}
-          tone="clicks"
-          isLoading={isInitialLoading}
-        />
-        <StatCard
-          label="Add to carts"
-          value={formatNumber(summary?.totalConversions)}
-          tone="conversions"
-          isLoading={isInitialLoading}
-        />
-        <StatCard
-          label="Overall conversion"
-          value={formatPercent(overallRate)}
-          hint={summary ? `${summary.totalVideos} videos · ${summary.totalProducts} products` : null}
-          tone="accent"
-          isLoading={isInitialLoading}
-        />
-      </section>
+        <main className={styles.content}>
+          {error && (
+            <div className={styles.error} role="alert">
+              <strong>Could not load analytics.</strong> {error.message}
+              <button type="button" className={styles.retry} onClick={refreshAll}>
+                Retry
+              </button>
+            </div>
+          )}
 
-      <main>
-        <VideoTable
-          rows={rows}
-          sortBy={sortBy}
-          order={order}
-          onSort={handleSort}
-          isLoading={isInitialLoading}
-          isRefreshing={isRefreshing}
-        />
+          {route === 'overview' && (
+            <OverviewView
+              summary={summary}
+              timeseries={timeseries.data}
+              topVideos={rows}
+              isLoading={isInitialLoading}
+              onSelectVideo={setSelectedVideoId}
+            />
+          )}
 
-        <Pagination
-          pagination={pagination}
-          limit={limit}
-          onPageChange={setPage}
-          onLimitChange={handleLimitChange}
-          disabled={isRefreshing}
-        />
-      </main>
+          {route === 'videos' && (
+            <VideosView
+              rows={rows}
+              meta={meta}
+              pagination={pagination}
+              limit={limit}
+              sortBy={sortBy}
+              order={order}
+              onSort={handleSort}
+              onPageChange={setPage}
+              onLimitChange={handleLimitChange}
+              onSelectVideo={setSelectedVideoId}
+              selectedId={selectedVideoId}
+              isLoading={isInitialLoading}
+              isRefreshing={isRefreshing}
+            />
+          )}
 
-      <footer className={styles.footer}>
-        <p>
-          Conversion rate is calculated in the browser as add-to-carts ÷ views. Videos with no
-          recorded views show — rather than 0%.
-        </p>
-      </footer>
+          {route === 'activity' && (
+            <ActivityView
+              events={recentEvents.data}
+              isLoading={recentEvents.isLoading}
+              onSelectVideo={setSelectedVideoId}
+            />
+          )}
+        </main>
+      </div>
+
+      <VideoDetail videoId={selectedVideoId} onClose={() => setSelectedVideoId(null)} />
     </div>
   );
 }

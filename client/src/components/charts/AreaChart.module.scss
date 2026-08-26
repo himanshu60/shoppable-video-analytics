@@ -1,0 +1,158 @@
+@use '../../styles/mixins' as *;
+
+.figure {
+  padding: var(--space-5);
+  margin: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin-top: var(--space-1);
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.plot {
+  position: relative;
+  width: 100%;
+
+  svg {
+    display: block;
+    touch-action: none;
+  }
+}
+
+// Recessive chrome: hairline, solid, one step off the surface. Never dashed -
+// a dashed grid competes with the data for attention.
+.grid {
+  stroke: var(--viz-grid);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  fill: var(--color-text-muted);
+}
+
+.line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+// A wash, not a block. The three fills nest rather than clash because the
+// series are naturally ordered views > clicks > conversions.
+.area {
+  opacity: var(--viz-fill-opacity);
+}
+
+.crosshair {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+// 2px ring in the surface colour keeps the dot legible where it crosses a
+// line or another marker.
+.marker {
+  stroke: var(--color-surface);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.endLabel {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  fill: var(--color-text-muted);
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  z-index: 3;
+  min-width: 9rem;
+  padding: var(--space-3);
+  pointer-events: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.tooltipDate {
+  margin-bottom: var(--space-2);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.tooltipRow {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  font-size: 0.8125rem;
+}
+
+.tooltipKey {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+  // Nudged up to sit on the text's optical centre rather than its baseline.
+  transform: translateY(-3px);
+}
+
+// Value leads, label follows: the number is what the reader came for.
+.tooltipValue {
+  min-width: 2.5rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.tooltipLabel {
+  color: var(--color-text-muted);
+}
+
+@include below($bp-narrow) {
+  .figure {
+    padding: var(--space-4);
+  }
+}
+
+// The final day is incomplete, so its segment is dashed to mark it as not
+// comparable with the completed days. Note this is a *data* qualifier - the
+// gridlines above stay solid, because dashed chrome competes with the data.
+.tail {
+  fill: none;
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+  stroke-linecap: round;
+}
+
+.note {
+  margin-top: var(--space-1);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}

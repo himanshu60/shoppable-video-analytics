@@ -191,7 +191,7 @@ export function getVideoDetail(id) {
       `SELECT id, event_type AS eventType, timestamp
        FROM engagement_events
        WHERE video_id = ?
-       ORDER BY id DESC
+       ORDER BY timestamp DESC, id DESC
        LIMIT 8`
     )
     .all(id);
@@ -213,7 +213,10 @@ export function getRecentEvents(limit = 30) {
        FROM engagement_events e
        INNER JOIN videos v   ON v.id = e.video_id
        INNER JOIN products p ON p.id = v.product_id
-       ORDER BY e.id DESC
+       -- Ordered by when the event happened, not by insertion order. Seeded
+       -- rows get random timestamps with sequential ids, so ORDER BY id would
+       -- present a feed labelled 'newest first' whose dates jump around.
+       ORDER BY e.timestamp DESC, e.id DESC
        LIMIT ?`
     )
     .all(limit);

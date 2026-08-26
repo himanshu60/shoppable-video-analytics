@@ -72,6 +72,21 @@ export function fetchVideos() {
   return request('/videos');
 }
 
+/** Daily event counts for the time-series chart. */
+export function fetchTimeseries(days = 14) {
+  return request(`/analytics/timeseries?days=${days}`);
+}
+
+/** One video with its metrics, its own daily series and its last events. */
+export function fetchVideoDetail(id) {
+  return request(`/videos/${id}`);
+}
+
+/** Newest events across all videos, for the activity feed. */
+export function fetchRecentEvents(limit = 30) {
+  return request(`/events/recent?limit=${limit}`);
+}
+
 /** Records one engagement event. */
 export function postEvent({ videoId, eventType }) {
   return request('/events', {

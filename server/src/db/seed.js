@@ -50,10 +50,18 @@ export function pickWeightedEventType(random = Math.random) {
   return EVENT_TYPES[0];
 }
 
-/** A random ISO-ish timestamp within the last `days` days, in SQLite format. */
+/**
+ * A random timestamp within the last `days` days, in SQLite's format.
+ *
+ * Ages are skewed toward the present (`random()` raised to a power > 1 pulls
+ * the distribution toward zero) rather than spread uniformly. A uniform spread
+ * draws a flat, lifeless trend line; a storefront that is gaining traction
+ * looks like a curve, and it gives the dashboard's period-over-period delta
+ * something real to report.
+ */
 function randomTimestamp(days = 30) {
-  const now = Date.now();
-  const then = now - Math.random() * days * 24 * 60 * 60 * 1000;
+  const skewedAge = Math.random() ** 1.8 * days;
+  const then = Date.now() - skewedAge * 24 * 60 * 60 * 1000;
   return new Date(then).toISOString().replace('T', ' ').slice(0, 19);
 }
 

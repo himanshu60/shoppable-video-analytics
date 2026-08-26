@@ -11,6 +11,7 @@ import { fetchSummary, fetchVideoAnalytics } from '../api/client.js';
 export function useAnalytics({ page, limit, sortBy, order }) {
   const [rows, setRows] = useState([]);
   const [pagination, setPagination] = useState(null);
+  const [meta, setMeta] = useState(null);
   const [summary, setSummary] = useState(null);
   // Distinguishes the very first load (show skeleton) from a background
   // refresh after simulating traffic (keep the table, dim it slightly).
@@ -40,6 +41,7 @@ export function useAnalytics({ page, limit, sortBy, order }) {
 
         setRows(analytics.data);
         setPagination(analytics.pagination);
+        setMeta(analytics.meta);
         setSummary(summaryResponse.data);
       } catch (err) {
         if (requestIdRef.current !== requestId) return;
@@ -61,5 +63,5 @@ export function useAnalytics({ page, limit, sortBy, order }) {
   /** Re-fetch without clearing the table, e.g. after simulating traffic. */
   const refresh = useCallback(() => load({ background: true }), [load]);
 
-  return { rows, pagination, summary, isInitialLoading, isRefreshing, error, refresh };
+  return { rows, meta, pagination, summary, isInitialLoading, isRefreshing, error, refresh };
 }

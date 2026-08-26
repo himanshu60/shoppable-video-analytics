@@ -128,10 +128,60 @@ tbody tr:hover :is(th, td) {
   color: var(--color-accent);
 }
 
+.row {
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.selected {
+  background: var(--color-accent-soft);
+
+  :is(th, td) {
+    background: var(--color-accent-soft);
+  }
+}
+
 .videoTitle {
   display: block;
+  padding: 0;
+  font: inherit;
   font-weight: 500;
   color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: 0;
+
+  &:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+}
+
+.metric {
+  display: block;
+}
+
+// Inline magnitude bar. Square at the baseline, 4px rounded at the data end -
+// the same spec as every other bar in the app, just smaller.
+.barTrack {
+  display: block;
+  width: 100%;
+  max-width: 5rem;
+  height: 5px;
+  margin-top: var(--space-1);
+  margin-left: auto;
+  overflow: hidden;
+  background: var(--color-surface-sunken);
+  border-radius: 3px;
+}
+
+.bar {
+  display: block;
+  height: 100%;
+  background: var(--viz-views);
+  border-radius: 0 3px 3px 0;
+  transition: width 280ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .videoUrl {
