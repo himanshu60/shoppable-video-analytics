@@ -43,35 +43,45 @@ export function ActivityFeed({ events, isLoading, onSelectVideo }) {
   }
 
   return (
-    <ol className={styles.feed}>
-      {events.map((event) => {
-        const seriesKey = SERIES_KEY_FOR_EVENT[event.eventType];
-        const series = SERIES_BY_KEY[seriesKey];
+    <div className={styles.wrapper}>
+      {/* tabIndex makes the scroll area keyboard-reachable — a plain overflow
+          container is not focusable, so keyboard users cannot scroll it. */}
+      <div className={styles.scroll} tabIndex="0" role="region" aria-label="Recent engagement events">
+        <ol className={styles.feed}>
+          {events.map((event) => {
+            const seriesKey = SERIES_KEY_FOR_EVENT[event.eventType];
+            const series = SERIES_BY_KEY[seriesKey];
 
-        return (
-          <li key={event.id} className={styles.item}>
-            {/* The dot carries identity; the verb beside it says the same
-                thing in words, so the feed is readable without colour. */}
-            <span className={styles.dot} style={{ background: series?.color }} aria-hidden="true" />
+            return (
+              <li key={event.id} className={styles.item}>
+                {/* The dot carries identity; the verb beside it says the same
+                    thing in words, so the feed is readable without colour. */}
+                <span
+                  className={styles.dot}
+                  style={{ background: series?.color }}
+                  aria-hidden="true"
+                />
 
-            <span className={styles.body}>
-              <span className={styles.action}>{EVENT_LABEL[event.eventType]}</span>{' '}
-              <button
-                type="button"
-                className={styles.videoLink}
-                onClick={() => onSelectVideo?.(event.videoId)}
-              >
-                {event.videoTitle}
-              </button>
-              <span className={styles.product}>{event.productName}</span>
-            </span>
+                <span className={styles.body}>
+                  <span className={styles.action}>{EVENT_LABEL[event.eventType]}</span>{' '}
+                  <button
+                    type="button"
+                    className={styles.videoLink}
+                    onClick={() => onSelectVideo?.(event.videoId)}
+                  >
+                    {event.videoTitle}
+                  </button>
+                  <span className={styles.product}>{event.productName}</span>
+                </span>
 
-            <time className={styles.time} dateTime={event.timestamp}>
-              {relativeTime(event.timestamp)}
-            </time>
-          </li>
-        );
-      })}
-    </ol>
+                <time className={styles.time} dateTime={event.timestamp}>
+                  {relativeTime(event.timestamp)}
+                </time>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </div>
   );
 }

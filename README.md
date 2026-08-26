@@ -32,10 +32,15 @@ and delete this section.
 
 ### Other public repositories
 
-_TODO: add links to public repos showing significant open-source or personal
-project contributions._
+Required by the brief: links to public repositories showing significant
+open-source or personal project contributions.
 
-- `https://github.com/himanshu60?tab=repositories`
+- GitHub profile: https://github.com/himanshu60
+
+_TODO: list your strongest two or three repositories individually, with a
+one-line description of each. If this project is your main public work, say so
+in one line rather than padding the list — a short honest answer reads better
+than a long thin one._
 
 ---
 
