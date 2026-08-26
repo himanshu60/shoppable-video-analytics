@@ -34,3 +34,11 @@ coverage/
 
 # Local chat transcript (personal, not for the public repo)
 docs/old-chat-transcript.md
+
+# Local working notes - not part of the deliverable.
+# AI_PROMPTING.md is the curated log the brief asks for; raw transcripts and
+# scratch notes stay on the machine.
+docs/old-chat-transcript.md
+*-transcript.md
+*.local.md
+notes/
