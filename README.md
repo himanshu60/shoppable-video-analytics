@@ -6,19 +6,12 @@ videos perform: views, clicks, add-to-cart conversions and conversion rate.
 Built as a take-home project — an Express + SQLite REST API and a React
 dashboard, in one npm-workspace monorepo.
 
----
+**[▶ Live demo](https://shoppable-video-analytics.onrender.com/#/overview)** ·
+[Technical walkthrough](https://drive.google.com/file/d/1YckhSh3bs1Cyl6AktfSRbehPKMj2Vb48/view?usp=sharing) ·
+[30-second pitch](https://youtu.be/RXuV-eKJxDY)
 
-## ⚠️ TODO before submitting
-
-These are the only things not yet filled in. Replace each placeholder below
-and delete this section.
-
-- [ ] **YouTube pitch (30s, unlisted)** — record and paste the link in
-      [Submission links](#submission-links)
-- [ ] **Loom / screen walkthrough (3–5 min)** — record and paste the link
-- [ ] **Other public repositories** — add links to your open-source and
-      personal project work
-- [ ] Push to GitHub and confirm the repo is **public**
+> The live demo runs on a free instance that sleeps after ~15 minutes idle, so
+> the first request may take 30–60 seconds to wake.
 
 ---
 
@@ -26,21 +19,22 @@ and delete this section.
 
 | Item | Link |
 |------|------|
-| GitHub repository | `https://github.com/himanshu60/shoppable-video-analytics` |
-| 30-second YouTube pitch | _TODO: paste unlisted YouTube link_ |
-| 3–5 minute technical walkthrough | _TODO: paste Loom link_ |
+| Live application | https://shoppable-video-analytics.onrender.com/#/overview |
+| GitHub repository | https://github.com/himanshu60/shoppable-video-analytics |
+| 30-second pitch (YouTube, unlisted) | https://youtu.be/RXuV-eKJxDY |
+| 3–5 minute technical walkthrough | https://drive.google.com/file/d/1YckhSh3bs1Cyl6AktfSRbehPKMj2Vb48/view?usp=sharing |
 
 ### Other public repositories
 
-Required by the brief: links to public repositories showing significant
-open-source or personal project contributions.
+Required by the brief: links to public repositories showing open-source or
+personal project contributions.
 
 - GitHub profile: https://github.com/himanshu60
 
-_TODO: list your strongest two or three repositories individually, with a
-one-line description of each. If this project is your main public work, say so
-in one line rather than padding the list — a short honest answer reads better
-than a long thin one._
+_TODO: list your strongest two or three repositories here with a one-line
+description of each. If this project is your main public work, replace this
+paragraph with a single sentence saying so — a short honest answer reads
+better than a padded list._
 
 ---
 

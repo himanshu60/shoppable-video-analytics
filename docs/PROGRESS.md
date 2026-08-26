@@ -324,9 +324,9 @@ actually takes. Testing the backend directly would not prove the proxy works.
 walkthrough, trade-offs) and `AI_PROMPTING.md` (the assignment-required log of
 AI interactions, including both debugging sessions).
 
-The README opens with a TODO checklist for the three things only you can
-supply: the YouTube pitch link, the Loom walkthrough link, and links to your
-other public repositories.
+The README opened with a TODO checklist for the items only I could supply:
+the pitch video, the walkthrough recording, and the public repository links.
+The first two are now filled in and the checklist has been removed.
 
 ---
 
