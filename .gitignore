@@ -31,3 +31,6 @@ coverage/
 
 # Vite dev cache
 .vite/
+
+# Local chat transcript (personal, not for the public repo)
+docs/old-chat-transcript.md

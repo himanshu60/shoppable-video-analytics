@@ -5,7 +5,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import { config, SERVER_ROOT } from './config.js';
 import { eventsRouter } from './routes/events.routes.js';
-import { analyticsRouter, videosRouter } from './routes/analytics.routes.js';
+import { analyticsRouter, eventsFeedRouter, videosRouter } from './routes/analytics.routes.js';
 import { errorHandler, notFoundHandler } from './middleware/errors.js';
 
 const CLIENT_DIST = path.resolve(SERVER_ROOT, '../client/dist');
@@ -23,6 +23,9 @@ export function createApp() {
 
   app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
+  // The feed router is mounted first so GET /api/events/recent resolves
+  // before the ingestion router, which only handles POST /.
+  app.use('/api/events', eventsFeedRouter);
   app.use('/api/events', eventsRouter);
   app.use('/api/analytics', analyticsRouter);
   app.use('/api/videos', videosRouter);

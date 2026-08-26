@@ -9,6 +9,12 @@ const SORTABLE = {
   createdAt: 'v.created_at',
 };
 
+/** The conditional counts every per-video query needs, written once. */
+const METRIC_COLUMNS = `
+  COUNT(CASE WHEN e.event_type = 'view'        THEN 1 END) AS views,
+  COUNT(CASE WHEN e.event_type = 'click'       THEN 1 END) AS clicks,
+  COUNT(CASE WHEN e.event_type = 'add_to_cart' THEN 1 END) AS conversions`;
+
 /**
  * Aggregated metrics for one page of videos.
  *
@@ -31,16 +37,14 @@ export function getVideoAnalytics({ page = 1, limit = 10, sortBy = 'views', orde
   const rows = db
     .prepare(
       `SELECT
-         v.id                                                      AS id,
-         v.title                                                   AS title,
-         v.video_url                                               AS videoUrl,
-         v.created_at                                              AS createdAt,
-         p.id                                                      AS productId,
-         p.name                                                    AS productName,
-         p.price                                                   AS productPrice,
-         COUNT(CASE WHEN e.event_type = 'view'        THEN 1 END)  AS views,
-         COUNT(CASE WHEN e.event_type = 'click'       THEN 1 END)  AS clicks,
-         COUNT(CASE WHEN e.event_type = 'add_to_cart' THEN 1 END)  AS conversions
+         v.id         AS id,
+         v.title      AS title,
+         v.video_url  AS videoUrl,
+         v.created_at AS createdAt,
+         p.id         AS productId,
+         p.name       AS productName,
+         p.price      AS productPrice,
+         ${METRIC_COLUMNS}
        FROM videos v
        INNER JOIN products p          ON p.id = v.product_id
        LEFT  JOIN engagement_events e ON e.video_id = v.id
@@ -54,8 +58,13 @@ export function getVideoAnalytics({ page = 1, limit = 10, sortBy = 'views', orde
   // SQLite materialise every group before the LIMIT could take effect.
   const { total } = db.prepare('SELECT COUNT(*) AS total FROM videos').get();
 
+  // The table draws a proportional bar per row, which needs a shared scale -
+  // computed here so every row on the page is measured against the same max.
+  const maxViews = rows.reduce((max, row) => Math.max(max, row.views), 0);
+
   return {
     data: rows,
+    meta: { maxViews },
     pagination: {
       page,
       limit,
@@ -86,4 +95,126 @@ export function getSummary() {
 /** Minimal video list; the frontend uses it to pick a random target. */
 export function listVideos() {
   return getDb().prepare('SELECT id, title FROM videos ORDER BY id').all();
+}
+
+/** 'YYYY-MM-DD' for a Date, in local time (SQLite stores local-style strings). */
+function toIsoDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+/**
+ * Builds the full list of dates in the window, oldest first.
+ *
+ * Days with no events must still appear, otherwise a quiet day would be
+ * skipped and the chart's x-axis would compress time - a gap would read as
+ * "no time passed" rather than "no activity".
+ */
+function dateRange(days) {
+  const today = new Date();
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (days - 1 - i));
+    return toIsoDate(date);
+  });
+}
+
+/**
+ * Daily event counts over the last `days` days, for the time-series chart.
+ *
+ * Filters on `timestamp >= ?` rather than `date(timestamp) >= ?` so the
+ * comparison stays sargable and idx_events_timestamp can be used; wrapping the
+ * column in a function would force a full scan.
+ */
+export function getTimeseries({ days = 14, videoId = null } = {}) {
+  const db = getDb();
+  const dates = dateRange(days);
+  const since = `${dates[0]} 00:00:00`;
+
+  const rows = videoId
+    ? db
+        .prepare(
+          `SELECT date(timestamp) AS date,
+             COUNT(CASE WHEN event_type = 'view'        THEN 1 END) AS views,
+             COUNT(CASE WHEN event_type = 'click'       THEN 1 END) AS clicks,
+             COUNT(CASE WHEN event_type = 'add_to_cart' THEN 1 END) AS conversions
+           FROM engagement_events
+           WHERE timestamp >= ? AND video_id = ?
+           GROUP BY date(timestamp)`
+        )
+        .all(since, videoId)
+    : db
+        .prepare(
+          `SELECT date(timestamp) AS date,
+             COUNT(CASE WHEN event_type = 'view'        THEN 1 END) AS views,
+             COUNT(CASE WHEN event_type = 'click'       THEN 1 END) AS clicks,
+             COUNT(CASE WHEN event_type = 'add_to_cart' THEN 1 END) AS conversions
+           FROM engagement_events
+           WHERE timestamp >= ?
+           GROUP BY date(timestamp)`
+        )
+        .all(since);
+
+  const byDate = new Map(rows.map((row) => [row.date, row]));
+
+  return dates.map(
+    (date) => byDate.get(date) ?? { date, views: 0, clicks: 0, conversions: 0 }
+  );
+}
+
+/** One video with its metrics, its product, and its own daily series. */
+export function getVideoDetail(id) {
+  const db = getDb();
+
+  const video = db
+    .prepare(
+      `SELECT
+         v.id         AS id,
+         v.title      AS title,
+         v.video_url  AS videoUrl,
+         v.created_at AS createdAt,
+         p.id         AS productId,
+         p.name       AS productName,
+         p.price      AS productPrice,
+         ${METRIC_COLUMNS}
+       FROM videos v
+       INNER JOIN products p          ON p.id = v.product_id
+       LEFT  JOIN engagement_events e ON e.video_id = v.id
+       WHERE v.id = ?
+       GROUP BY v.id`
+    )
+    .get(id);
+
+  if (!video) return null;
+
+  const recentEvents = db
+    .prepare(
+      `SELECT id, event_type AS eventType, timestamp
+       FROM engagement_events
+       WHERE video_id = ?
+       ORDER BY id DESC
+       LIMIT 8`
+    )
+    .all(id);
+
+  return { ...video, timeseries: getTimeseries({ days: 14, videoId: id }), recentEvents };
+}
+
+/** The newest events across all videos, for the activity feed. */
+export function getRecentEvents(limit = 30) {
+  return getDb()
+    .prepare(
+      `SELECT
+         e.id                AS id,
+         e.event_type        AS eventType,
+         e.timestamp         AS timestamp,
+         v.id                AS videoId,
+         v.title             AS videoTitle,
+         p.name              AS productName
+       FROM engagement_events e
+       INNER JOIN videos v   ON v.id = e.video_id
+       INNER JOIN products p ON p.id = v.product_id
+       ORDER BY e.id DESC
+       LIMIT ?`
+    )
+    .all(limit);
 }
