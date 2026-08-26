@@ -408,3 +408,73 @@ auth would be unrequested scope and would complicate the reviewer's setup. It
 is listed in the README as a deliberate omission.
 
 ---
+
+## Step 12 - Multi-view dashboard
+
+**Feedback:** the UI was functional but plain, and everything sat on one
+screen.
+
+**What changed:** three views behind a sidebar, plus a detail panel.
+
+| View | Contents |
+|------|----------|
+| Overview | Funnel, sparkline stat cards with period deltas, engagement-over-time chart, top-5 videos |
+| Videos | The data table, now with inline magnitude bars and click-through rows |
+| Activity | Live event feed, newest first |
+| Detail panel | Opens over any view: per-video metrics, its own 14-day chart, its latest events |
+
+**Three new endpoints** back these: `/api/analytics/timeseries` (daily counts
+with zero-filled gaps), `/api/videos/:id` (detail), `/api/events/recent`
+(feed).
+
+### Charts are hand-rolled SVG
+
+No chart library. Recharts or Chart.js would each add 50-150 kB for four
+simple forms, and writing them directly means the mark specs are exactly as
+intended: 2px lines, 10% area washes, 4px rounded bar ends square at the
+baseline, hairline solid gridlines, markers with a 2px surface ring.
+
+**Colour was computed, not chosen.** The three series use categorical slots
+1-3 (blue / orange / aqua), validated against both surfaces for colour-blind
+separation: all-pairs CVD dE 9.2 light and 9.4 dark, normal-vision dE 24.0 /
+20.9. The aqua slot sits at 2.82:1 contrast on the white card, below the 3:1
+bar - which is why the charts ship direct labels and a table view rather than
+relying on the hue alone. Each series keeps its hue in every chart, stat card,
+legend and feed row: colour follows the entity, never its rank.
+
+### Three bugs found by looking at the rendered output
+
+Screenshots were taken of every view in both themes. All three of these
+passed the test suite and were only visible on screen:
+
+1. **The feed was sorted by insertion id but displayed timestamps.** Seeded
+   rows get random timestamps with sequential ids, so a feed labelled "newest
+   first" showed dates jumping around. The test asserting descending ids
+   passed the whole time - it was testing the wrong property, and was
+   rewritten to assert on timestamps.
+
+2. **The chart nosedived at the right edge.** The last day is still in
+   progress, so its partial count sat beside complete days and read as a
+   crash - and drove a fake "-25.4%" on the views card. The final segment is
+   now dashed with a note, and excluded from both the delta and the
+   sparklines. Note the dashed stroke here is a *data qualifier*; the
+   gridlines stay solid, because dashed chrome competes with the data.
+
+3. **The trend line was flat.** Seed timestamps were spread uniformly across
+   30 days. They are now skewed toward the present, which is more realistic
+   and gives the period-over-period delta something real to report.
+
+**The lesson:** a passing test suite says the code does what it was told to.
+It says nothing about whether the result is right to look at. Rendering the
+output and examining it caught three defects that 29 green tests did not.
+
+### Routing
+
+A ~30-line hash router rather than react-router: three routes do not justify
+the dependency, and hash routes survive a hard refresh behind a static bundle
+with no server-side rewrite. The trade-off is uglier URLs (`#/videos`).
+
+**Verify:** `npm run dev`, then click through Overview / Videos / Activity and
+select any video row.
+
+---

@@ -235,3 +235,61 @@ This prompt is also what produced `docs/PROGRESS.md`, the step-by-step build
 log explaining the reasoning behind each decision.
 
 ---
+
+## Entry 7 — UI redesign: from one flat table to a multi-view dashboard
+
+**Tool used:** Claude Code CLI (Claude Opus 5)
+
+**Context / Task:** The first dashboard was functionally complete but visually
+plain — four large empty stat cards, one table, no data visualisation, and a
+single screen.
+
+**Exact prompt used:**
+
+```
+but still UI not looks good and verify everything is covered as per
+assignment because on ui i am only able to see single screen I am using a
+premium model but ui looks very simple like as a beginner develop
+```
+
+**Outcome & Adjustments:**
+
+The AI first re-verified the brief (everything required was already covered —
+the criticism was about presentation, not completeness), then asked which
+direction to take the redesign rather than guessing. I chose the multi-view
+option: sidebar navigation with Overview / Videos / Activity, charts, and a
+per-video detail panel.
+
+What it built: three new API endpoints (daily time-series with zero-filled
+gaps, video detail, recent-events feed), an inline-SVG chart set with no chart
+library, a funnel visual, sparklines in the stat cards, magnitude bars in the
+table, and a slide-over detail panel.
+
+**The part I want to highlight** — it took its own screenshots and found three
+bugs by looking at them, rather than declaring the work done:
+
+1. **The activity feed was ordered by insertion id while displaying
+   timestamps.** Seeded rows get random timestamps with sequential ids, so a
+   feed labelled "newest first" showed dates jumping around (25/8, 25/8, 16/8,
+   03/8, 29/7). Fixed to `ORDER BY timestamp DESC`. The original test asserted
+   ids were descending — it passed while the UI was visibly wrong, so the test
+   was rewritten to assert on timestamps.
+
+2. **The chart nosedived at the right edge.** The final day is still in
+   progress, so its partial count sat next to complete days and read as a
+   crash. That also drove a fake "−25.4%" on the views stat card. Fixed by
+   drawing the final segment dashed with a note, and excluding it from both
+   the delta and the sparklines.
+
+3. **The trend line was flat and lifeless** because seed timestamps were
+   spread uniformly across 30 days. Skewed them toward the present, which is
+   both more realistic and gives the period-over-period delta something real
+   to report.
+
+**Adjustment I made:** I asked it to justify the colour choices rather than
+pick by eye. It ran a palette validator for colour-blind separation against
+both the light and dark surfaces (all-pairs CVD ΔE 9.2 light / 9.4 dark) and
+noted that the aqua series sits below 3:1 contrast on white, which is why the
+charts ship direct labels and the table view alongside them.
+
+---
